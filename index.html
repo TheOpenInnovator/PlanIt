@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaniT - Your Universe, Your Rules</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Enhanced 3D Starfield Background */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+            background: radial-gradient(ellipse at center, #0f0f23 0%, #1a1a2e 30%, #16213e 60%, #0f3460 100%);
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+            box-shadow: 0 0 6px rgba(255,255,255,0.8);
+        }
+        
+        .star.small {
+            width: 1px;
+            height: 1px;
+            animation-duration: 2s;
+        }
+        
+        .star.medium {
+            width: 2px;
+            height: 2px;
+            animation-duration: 3s;
+            box-shadow: 0 0 8px rgba(255,255,255,0.9);
+        }
+        
+        .star.large {
+            width: 3px;
+            height: 3px;
+            animation-duration: 4s;
+            box-shadow: 0 0 12px rgba(255,255,255,1);
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+        
+        .moving-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(3px 3px at 20px 30px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,1), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(3px 3px at 160px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 200px 60px, rgba(255,255,255,0.9), transparent);
+            background-repeat: repeat;
+            background-size: 250px 120px;
+            animation: moveStars 80s linear infinite;
+        }
+        
+        @keyframes moveStars {
+            from { transform: translateX(0) translateY(0) translateZ(0); }
+            to { transform: translateX(-250px) translateY(-120px) translateZ(100px); }
+        }
+        
+        .timeline-line {
+            background: linear-gradient(to bottom, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+        
+        .task-card {
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, 
+                rgba(255,255,255,0.95) 0%, 
+                rgba(248,250,252,0.9) 100%);
+        }
+        
+        .time-marker {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+        
+        .galaxy-timeline {
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.95) 50%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.15),
+                inset 0 0 20px rgba(99, 102, 241, 0.05);
+            backdrop-filter: blur(20px);
+        }
+        
+        .free-time-space {
+            background: linear-gradient(135deg, 
+                rgba(226, 232, 240, 0.8) 0%, 
+                rgba(241, 245, 249, 0.8) 100%);
+            position: absolute;
+            top: 0;
+            height: 100%;
+            opacity: 0.7;
+        }
+        
+        .task-galaxy {
+            position: absolute;
+            top: 2px;
+            height: calc(100% - 4px);
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            backdrop-filter: blur(3px);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 
+                0 4px 20px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+        
+        .task-galaxy:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        
+        .current-time-pointer {
+            position: absolute;
+            top: -16px;
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 12px solid #ef4444;
+            z-index: 50;
+            transition: all 0.1s ease-out;
+            filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.7));
+        }
+        
+        .current-time-pointer::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: -5px;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #ef4444 0%, #dc2626 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 15px rgba(239, 68, 68, 0.9),
+                0 0 30px rgba(239, 68, 68, 0.4);
+            animation: pointerPulse 2s infinite;
+        }
+        
+        .current-time-pointer::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: -1.5px;
+            width: 3px;
+            height: 24px;
+            background: linear-gradient(to bottom, #ef4444 0%, rgba(239, 68, 68, 0.8) 100%);
+            border-radius: 1.5px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        @keyframes pointerPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.8; }
+        }
+        
+        .task-tooltip {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.98) 0%, 
+                rgba(248, 250, 252, 0.98) 100%);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            color: #1e293b;
+        }
+        
+        .premium-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.9) 100%);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        
+        .glass-morphism {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(248, 250, 252, 0.85) 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        }
+        
+        .floating-animation {
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .premium-button {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+        
+        .premium-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .premium-button:hover::before {
+            left: 100%;
+        }
+        
+        .edit-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+        
+        .edit-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .delete-button {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+        
+        .delete-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .hour-section:hover {
+            background: linear-gradient(135deg, 
+                rgba(99, 102, 241, 0.05) 0%, 
+                rgba(139, 92, 246, 0.05) 100%);
+            transition: all 0.4s ease;
+        }
+        
+        .task-item {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.9) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-left: 3px solid;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            height: 60px;
+        }
+        
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.98) 0%, 
+                rgba(248, 250, 252, 0.95) 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        
+        .recurring-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #8b5cf6;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .recurring-checkbox.checked {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+        
+        .recurring-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .input-light {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(248, 250, 252, 0.9) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #1e293b;
+            backdrop-filter: blur(20px);
+        }
+        
+        .input-light::placeholder {
+            color: #64748b;
+        }
+        
+        .input-light:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .compact-timeline {
+            height: 50px;
+        }
+        
+        .compact-timeline .current-time-pointer {
+            top: -14px;
+        }
+        
+        .compact-timeline .current-time-pointer::before {
+            height: 20px;
+            top: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-x-hidden">
+    <!-- Enhanced 3D Starfield Background -->
+    <div class="starfield">
+        <div class="moving-stars"></div>
+    </div>
+    
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Header -->
+        <div class="text-center mb-8 relative z-10 floating-animation">
+            <h1 class="text-7xl font-bold gradient-text mb-4 tracking-tight">
+                🚀 PlaniT
+            </h1>
+            <p class="text-white text-2xl mb-2 font-medium opacity-90">Your Universe, Your Rules. Make Space for what matters.</p>
+            <div id="currentTime" class="text-4xl font-semibold mt-6 text-white"></div>
+        </div>
+
+        <!-- Horizontal Timeline Bar -->
+        <div class="premium-card rounded-3xl p-6 mb-8 relative z-10">
+            <h2 class="text-2xl font-bold text-slate-700 mb-4 gradient-text">⏰ Daily Timeline</h2>
+            <div class="relative">
+                <!-- Timeline Container -->
+                <div id="horizontalTimeline" class="galaxy-timeline compact-timeline relative rounded-xl overflow-hidden shadow-xl">
+                    <!-- Current time pointer -->
+                    <div id="currentTimePointer" class="current-time-pointer">
+                        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap font-bold shadow-lg border border-white/20">
+                            <span id="currentTimeLabel">Now</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Time labels -->
+                <div class="flex justify-between mt-4 text-xs text-slate-600 font-medium">
+                    <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">12 AM</span>
+                    <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">6 AM</span>
+                    <span class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">12 PM</span>
+                    <span class="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">6 PM</span>
+                    <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">12 AM</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Task Form -->
+        <div class="glass-morphism rounded-3xl p-6 mb-8 relative z-10">
+            <h2 class="text-2xl font-bold text-slate-700 mb-4 gradient-text">➕ Create New Task</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <input type="time" id="taskStartTime" class="input-light px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none text-lg">
+                <input type="time" id="taskEndTime" class="input-light px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none text-lg">
+                <input type="text" id="taskDescription" placeholder="What needs to be done?" class="input-light lg:col-span-2 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none text-lg">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <div id="recurringCheckbox" class="recurring-checkbox" onclick="toggleRecurring()"></div>
+                        <label class="text-slate-700 text-sm font-medium">Daily</label>
+                    </div>
+                    <button onclick="addTask()" class="premium-button px-6 py-3 text-white font-bold rounded-xl shadow-lg text-lg hover:scale-105 transition-all duration-300 flex-1">
+                        ✨ Add
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Container -->
+        <div class="relative z-10">
+            <!-- Timeline Line -->
+            <div class="timeline-line absolute left-8 top-0 w-1 h-full rounded-full shadow-lg"></div>
+            
+            <!-- Hours Container -->
+            <div id="hoursContainer" class="space-y-3">
+                <!-- Hours will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="editModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeEditModal()"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content relative max-w-lg w-full rounded-3xl p-8 shadow-2xl">
+                <h3 class="text-2xl font-bold text-slate-700 mb-6 gradient-text">✏️ Edit Task</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="time" id="editTaskStartTime" class="input-light px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none">
+                        <input type="time" id="editTaskEndTime" class="input-light px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none">
+                    </div>
+                    <input type="text" id="editTaskDescription" placeholder="Task description..." class="input-light w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none">
+                    <div class="flex items-center gap-2">
+                        <div id="editRecurringCheckbox" class="recurring-checkbox" onclick="toggleEditRecurring()"></div>
+                        <label class="text-slate-700 font-medium">Daily Recurring</label>
+                    </div>
+                </div>
+                <div class="flex gap-4 mt-8">
+                    <button onclick="saveEditTask()" class="premium-button flex-1 px-6 py-3 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-all duration-300">
+                        💾 Save Changes
+                    </button>
+                    <button onclick="closeEditModal()" class="bg-gray-400 hover:bg-gray-500 flex-1 px-6 py-3 text-white font-bold rounded-xl transition-all duration-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeDeleteModal()"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content relative max-w-md w-full rounded-3xl p-8 shadow-2xl">
+                <h3 class="text-2xl font-bold text-slate-700 mb-4 text-center">🗑️ Delete Task</h3>
+                <p class="text-slate-600 text-center mb-6">Are you sure you want to delete this task?</p>
+                <div id="deleteTaskInfo" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                    <!-- Task info will be inserted here -->
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="confirmDelete()" class="delete-button flex-1 px-6 py-3 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-all duration-300">
+                        🗑️ Delete
+                    </button>
+                    <button onclick="closeDeleteModal()" class="bg-gray-400 hover:bg-gray-500 flex-1 px-6 py-3 text-white font-bold rounded-xl transition-all duration-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tasks = {};
+        let editingTask = null;
+        let deletingTask = null;
+        let isRecurring = false;
+        let isEditRecurring = false;
+        
+        // Initialize the application
+        function init() {
+            generateStars();
+            generateHours();
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+            setInterval(checkMidnight, 60000); // Check every minute for midnight
+            loadSampleTasks();
+        }
+        
+        // Generate enhanced 3D starfield
+        function generateStars() {
+            const starfield = document.querySelector('.starfield');
+            const numStars = 150;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                const size = Math.random() > 0.6 ? 'large' : Math.random() > 0.3 ? 'medium' : 'small';
+                star.className = `star ${size}`;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                starfield.appendChild(star);
+            }
+        }
+        
+        // Toggle recurring checkbox
+        function toggleRecurring() {
+            isRecurring = !isRecurring;
+            const checkbox = document.getElementById('recurringCheckbox');
+            if (isRecurring) {
+                checkbox.classList.add('checked');
+            } else {
+                checkbox.classList.remove('checked');
+            }
+        }
+        
+        // Toggle edit recurring checkbox
+        function toggleEditRecurring() {
+            isEditRecurring = !isEditRecurring;
+            const checkbox = document.getElementById('editRecurringCheckbox');
+            if (isEditRecurring) {
+                checkbox.classList.add('checked');
+            } else {
+                checkbox.classList.remove('checked');
+            }
+        }
+        
+        // Check for midnight to reset recurring tasks
+        function checkMidnight() {
+            const now = new Date();
+            if (now.getHours() === 0 && now.getMinutes() === 0) {
+                resetRecurringTasks();
+            }
+        }
+        
+        // Reset recurring tasks at midnight
+        function resetRecurringTasks() {
+            // This would typically be handled by a backend, but for demo purposes
+            // we'll just refresh the display
+            Object.keys(tasks).forEach(hour => {
+                renderTasks(parseInt(hour));
+            });
+            updateHorizontalTimeline();
+        }
+        
+        // Generate 24 hour slots
+        function generateHours() {
+            const container = document.getElementById('hoursContainer');
+            
+            for (let hour = 0; hour < 24; hour++) {
+                const hourDiv = document.createElement('div');
+                hourDiv.className = 'hour-section relative flex items-start py-3 px-4 rounded-xl transition-all duration-300';
+                hourDiv.id = `hour-${hour}`;
+                
+                const displayTime = hour === 0 ? '12:00 AM' : 
+                                  hour < 12 ? `${hour}:00 AM` : 
+                                  hour === 12 ? '12:00 PM' : 
+                                  `${hour - 12}:00 PM`;
+                
+                hourDiv.innerHTML = `
+                    <div class="time-marker w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-xl z-10 border-2 border-white/20">
+                        ${hour}
+                    </div>
+                    <div class="ml-6 flex-1">
+                        <div class="text-xl font-bold text-slate-700 mb-2 gradient-text">${displayTime}</div>
+                        <div id="tasks-${hour}" class="space-y-2">
+                            <!-- Tasks will be added here -->
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(hourDiv);
+            }
+            updateHorizontalTimeline();
+        }
+        
+        // Add a new task
+        function addTask() {
+            const startTimeInput = document.getElementById('taskStartTime');
+            const endTimeInput = document.getElementById('taskEndTime');
+            const descriptionInput = document.getElementById('taskDescription');
+            
+            const startTime = startTimeInput.value;
+            const endTime = endTimeInput.value;
+            const description = descriptionInput.value.trim();
+            
+            if (!startTime || !endTime || !description) {
+                showNotification('Please fill in all fields!', 'error');
+                return;
+            }
+            
+            // Validate end time is after start time
+            if (endTime <= startTime) {
+                showNotification('End time must be after start time!', 'error');
+                return;
+            }
+            
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
+            const taskId = Date.now();
+            
+            if (!tasks[startHours]) {
+                tasks[startHours] = [];
+            }
+            
+            const task = {
+                id: taskId,
+                startTime: startTime,
+                endTime: endTime,
+                description: description,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+                endHour: endHours,
+                recurring: isRecurring
+            };
+            
+            tasks[startHours].push(task);
+            
+            // Sort tasks by start time
+            tasks[startHours].sort((a, b) => a.startMinutes - b.startMinutes);
+            
+            renderTasks(startHours);
+            updateHorizontalTimeline();
+            
+            // Clear inputs
+            startTimeInput.value = '';
+            endTimeInput.value = '';
+            descriptionInput.value = '';
+            isRecurring = false;
+            document.getElementById('recurringCheckbox').classList.remove('checked');
+            
+            showNotification('Task added successfully!', 'success');
+        }
+        
+        // Calculate task duration
+        function calculateDuration(startTime, endTime) {
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
+            
+            const startTotalMinutes = startHours * 60 + startMinutes;
+            const endTotalMinutes = endHours * 60 + endMinutes;
+            
+            const durationMinutes = endTotalMinutes - startTotalMinutes;
+            const hours = Math.floor(durationMinutes / 60);
+            const minutes = durationMinutes % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+        
+        // Render tasks for a specific hour
+        function renderTasks(hour) {
+            const tasksContainer = document.getElementById(`tasks-${hour}`);
+            tasksContainer.innerHTML = '';
+            
+            if (tasks[hour]) {
+                tasks[hour].forEach(task => {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task-item p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-between';
+                    
+                    // Assign unique border color
+                    const colors = [
+                        'border-purple-400', 'border-pink-400', 'border-blue-400', 
+                        'border-green-400', 'border-yellow-400', 'border-red-400', 
+                        'border-indigo-400', 'border-cyan-400', 'border-orange-400', 'border-teal-400'
+                    ];
+                    const colorIndex = task.id % colors.length;
+                    taskDiv.classList.add(colors[colorIndex]);
+                    
+                    const duration = calculateDuration(task.startTime, task.endTime);
+                    const recurringIcon = task.recurring ? '♻️ ' : '';
+                    
+                    taskDiv.innerHTML = `
+                        <div class="flex-1">
+                            <div class="text-sm font-bold text-purple-600 mb-1">
+                                ${recurringIcon}⏰ ${task.startTime} - ${task.endTime} (${duration})
+                            </div>
+                            <div class="text-slate-700 font-medium text-sm">${task.description}</div>
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <button onclick="editTask(${hour}, ${task.id})" class="edit-button p-2 rounded-lg text-white shadow-lg">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="showDeleteModal(${hour}, ${task.id})" class="delete-button p-2 rounded-lg text-white shadow-lg">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    
+                    tasksContainer.appendChild(taskDiv);
+                });
+            }
+        }
+        
+        // Show delete confirmation modal
+        function showDeleteModal(hour, taskId) {
+            const task = tasks[hour].find(t => t.id === taskId);
+            if (task) {
+                deletingTask = { hour, taskId, task };
+                const duration = calculateDuration(task.startTime, task.endTime);
+                const recurringText = task.recurring ? ' (Daily Recurring)' : '';
+                
+                document.getElementById('deleteTaskInfo').innerHTML = `
+                    <div class="text-slate-700 font-bold">${task.description}${recurringText}</div>
+                    <div class="text-red-600 text-sm mt-1">${task.startTime} - ${task.endTime} (${duration})</div>
+                `;
+                document.getElementById('deleteModal').classList.remove('hidden');
+            }
+        }
+        
+        // Confirm delete
+        function confirmDelete() {
+            if (!deletingTask) return;
+            
+            const { hour, taskId } = deletingTask;
+            tasks[hour] = tasks[hour].filter(task => task.id !== taskId);
+            if (tasks[hour].length === 0) {
+                delete tasks[hour];
+            }
+            renderTasks(hour);
+            updateHorizontalTimeline();
+            closeDeleteModal();
+            showNotification('Task deleted successfully!', 'success');
+        }
+        
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            deletingTask = null;
+        }
+        
+        // Edit task
+        function editTask(hour, taskId) {
+            const task = tasks[hour].find(t => t.id === taskId);
+            if (task) {
+                editingTask = { hour, taskId, task };
+                document.getElementById('editTaskStartTime').value = task.startTime;
+                document.getElementById('editTaskEndTime').value = task.endTime;
+                document.getElementById('editTaskDescription').value = task.description;
+                
+                isEditRecurring = task.recurring;
+                const checkbox = document.getElementById('editRecurringCheckbox');
+                if (isEditRecurring) {
+                    checkbox.classList.add('checked');
+                } else {
+                    checkbox.classList.remove('checked');
+                }
+                
+                document.getElementById('editModal').classList.remove('hidden');
+            }
+        }
+        
+        // Save edited task
+        function saveEditTask() {
+            if (!editingTask) return;
+            
+            const newStartTime = document.getElementById('editTaskStartTime').value;
+            const newEndTime = document.getElementById('editTaskEndTime').value;
+            const newDescription = document.getElementById('editTaskDescription').value.trim();
+            
+            if (!newStartTime || !newEndTime || !newDescription) {
+                showNotification('Please fill in all fields!', 'error');
+                return;
+            }
+            
+            if (newEndTime <= newStartTime) {
+                showNotification('End time must be after start time!', 'error');
+                return;
+            }
+            
+            const [newStartHours, newStartMinutes] = newStartTime.split(':').map(Number);
+            const [newEndHours, newEndMinutes] = newEndTime.split(':').map(Number);
+            const oldHour = editingTask.hour;
+            const taskId = editingTask.taskId;
+            
+            // Remove from old hour
+            tasks[oldHour] = tasks[oldHour].filter(t => t.id !== taskId);
+            if (tasks[oldHour].length === 0) {
+                delete tasks[oldHour];
+            }
+            
+            // Add to new hour
+            if (!tasks[newStartHours]) {
+                tasks[newStartHours] = [];
+            }
+            
+            tasks[newStartHours].push({
+                id: taskId,
+                startTime: newStartTime,
+                endTime: newEndTime,
+                description: newDescription,
+                startMinutes: newStartMinutes,
+                endMinutes: newEndMinutes,
+                endHour: newEndHours,
+                recurring: isEditRecurring
+            });
+            
+            // Sort tasks by time
+            tasks[newStartHours].sort((a, b) => a.startMinutes - b.startMinutes);
+            
+            // Re-render affected hours
+            renderTasks(oldHour);
+            if (oldHour !== newStartHours) {
+                renderTasks(newStartHours);
+            }
+            
+            updateHorizontalTimeline();
+            closeEditModal();
+            showNotification('Task updated successfully!', 'success');
+        }
+        
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            editingTask = null;
+            isEditRecurring = false;
+        }
+        
+        // Update current time display
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: true,
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+            
+            // Update horizontal timeline pointer
+            updateCurrentTimePointer(now);
+            
+            // Highlight current hour
+            const currentHour = now.getHours();
+            document.querySelectorAll('.hour-section').forEach((section, index) => {
+                if (index === currentHour) {
+                    section.classList.add('bg-gradient-to-r', 'from-purple-50', 'to-indigo-50', 'border-l-4', 'border-purple-400', 'shadow-xl');
+                } else {
+                    section.classList.remove('bg-gradient-to-r', 'from-purple-50', 'to-indigo-50', 'border-l-4', 'border-purple-400', 'shadow-xl');
+                }
+            });
+        }
+        
+        // Update current time pointer on horizontal timeline
+        function updateCurrentTimePointer(now) {
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            
+            // Calculate position as percentage of the day
+            const totalMinutes = hours * 60 + minutes + seconds / 60;
+            const percentage = (totalMinutes / (24 * 60)) * 100;
+            
+            const pointer = document.getElementById('currentTimePointer');
+            const label = document.getElementById('currentTimeLabel');
+            
+            pointer.style.left = `${percentage}%`;
+            
+            // Update label with current time
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: true,
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+            label.textContent = timeString;
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'from-green-500 to-emerald-500' : 'from-red-500 to-pink-500';
+            const icon = type === 'success' ? '✨' : '⚠️';
+            
+            notification.className = `fixed top-6 right-6 bg-gradient-to-r ${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl z-50 transform translate-x-full transition-all duration-500 backdrop-blur-lg border border-white/20`;
+            notification.innerHTML = `<div class="flex items-center gap-3"><span class="text-xl">${icon}</span><span class="font-bold">${message}</span></div>`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 500);
+            }, 3000);
+        }
+        
+        // Update horizontal timeline with tasks and free time
+        function updateHorizontalTimeline() {
+            const timeline = document.getElementById('horizontalTimeline');
+            
+            // Remove existing blocks
+            const existingBlocks = timeline.querySelectorAll('.task-galaxy, .free-time-space');
+            existingBlocks.forEach(block => block.remove());
+            
+            // Create free time background
+            const freeTimeBlock = document.createElement('div');
+            freeTimeBlock.className = 'free-time-space';
+            freeTimeBlock.style.left = '0%';
+            freeTimeBlock.style.width = '100%';
+            timeline.appendChild(freeTimeBlock);
+            
+            // Create task blocks with unique colors
+            const taskColors = [
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                'linear-gradient(135deg, #ff8a80 0%, #ea4c89 100%)',
+                'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
+            ];
+            
+            let colorIndex = 0;
+            Object.keys(tasks).forEach(hour => {
+                const hourTasks = tasks[hour];
+                hourTasks.forEach(task => {
+                    const [startHour, startMinute] = task.startTime.split(':').map(Number);
+                    const [endHour, endMinute] = task.endTime.split(':').map(Number);
+                    
+                    const startTotalMinutes = startHour * 60 + startMinute;
+                    const endTotalMinutes = endHour * 60 + endMinute;
+                    
+                    const startPercent = (startTotalMinutes / (24 * 60)) * 100;
+                    const widthPercent = ((endTotalMinutes - startTotalMinutes) / (24 * 60)) * 100;
+                    
+                    const block = document.createElement('div');
+                    block.className = 'task-galaxy z-20';
+                    block.style.background = taskColors[colorIndex % taskColors.length];
+                    block.style.left = `${startPercent}%`;
+                    block.style.width = `${widthPercent}%`;
+                    
+                    // Add hover events
+                    block.addEventListener('mouseenter', (e) => showTooltip(e, task));
+                    block.addEventListener('mouseleave', hideTooltip);
+                    
+                    timeline.appendChild(block);
+                    colorIndex++;
+                });
+            });
+            
+            // Add timeline hover functionality
+            timeline.addEventListener('mousemove', handleTimelineHover);
+            timeline.addEventListener('mouseleave', hideTooltip);
+        }
+        
+        // Handle timeline hover
+        function handleTimelineHover(e) {
+            const timeline = e.currentTarget;
+            const rect = timeline.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percentage = (x / rect.width) * 100;
+            const timeMinutes = (percentage / 100) * (24 * 60);
+            
+            // Find task at this time
+            let hoveredTask = null;
+            Object.keys(tasks).forEach(hour => {
+                tasks[hour].forEach(task => {
+                    const [startHour, startMinute] = task.startTime.split(':').map(Number);
+                    const [endHour, endMinute] = task.endTime.split(':').map(Number);
+                    
+                    const startTotalMinutes = startHour * 60 + startMinute;
+                    const endTotalMinutes = endHour * 60 + endMinute;
+                    
+                    if (timeMinutes >= startTotalMinutes && timeMinutes <= endTotalMinutes) {
+                        hoveredTask = task;
+                    }
+                });
+            });
+            
+            if (hoveredTask) {
+                showTooltip(e, hoveredTask);
+            } else {
+                hideTooltip();
+            }
+        }
+        
+        // Show tooltip for task
+        function showTooltip(event, task) {
+            hideTooltip(); // Remove existing tooltip
+            
+            const tooltip = document.createElement('div');
+            tooltip.id = 'taskTooltip';
+            tooltip.className = 'task-tooltip fixed z-50 px-4 py-3 text-sm rounded-xl shadow-2xl pointer-events-none transform scale-0 transition-all duration-200';
+            
+            const duration = calculateDuration(task.startTime, task.endTime);
+            const recurringIcon = task.recurring ? '♻️ ' : '';
+            
+            tooltip.innerHTML = `
+                <div class="font-bold text-purple-600 mb-1">${recurringIcon}⏰ ${task.startTime} - ${task.endTime}</div>
+                <div class="text-slate-700 mb-1">${task.description}</div>
+                <div class="text-slate-500 text-xs">Duration: ${duration}</div>
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+            tooltip.style.top = `${rect.top - tooltip.offsetHeight - 15}px`;
+            
+            // Animate in
+            setTimeout(() => {
+                tooltip.classList.remove('scale-0');
+                tooltip.classList.add('scale-100');
+            }, 10);
+        }
+        
+        // Hide tooltip
+        function hideTooltip() {
+            const tooltip = document.getElementById('taskTooltip');
+            if (tooltip) {
+                tooltip.remove();
+            }
+        }
+        
+        // Load sample tasks for demonstration
+        function loadSampleTasks() {
+            const sampleTasks = [
+                { hour: 9, startTime: '09:00', endTime: '09:30', description: 'Morning standup meeting', recurring: true },
+                { hour: 12, startTime: '12:00', endTime: '13:00', description: 'Lunch break', recurring: true },
+                { hour: 14, startTime: '14:00', endTime: '15:30', description: 'Client presentation', recurring: false },
+                { hour: 16, startTime: '16:30', endTime: '17:00', description: 'Team retrospective', recurring: false },
+                { hour: 18, startTime: '18:00', endTime: '19:30', description: 'Gym workout', recurring: true }
+            ];
+            
+            sampleTasks.forEach(task => {
+                const [startHour, startMinute] = task.startTime.split(':').map(Number);
+                const [endHour, endMinute] = task.endTime.split(':').map(Number);
+                
+                if (!tasks[task.hour]) {
+                    tasks[task.hour] = [];
+                }
+                tasks[task.hour].push({
+                    id: Date.now() + Math.random(),
+                    startTime: task.startTime,
+                    endTime: task.endTime,
+                    description: task.description,
+                    startMinutes: startMinute,
+                    endMinutes: endMinute,
+                    endHour: endHour,
+                    recurring: task.recurring
+                });
+            });
+            
+            // Render all sample tasks
+            sampleTasks.forEach(task => {
+                renderTasks(task.hour);
+            });
+            
+            updateHorizontalTimeline();
+        }
+        
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96838b4f50029a84',t:'MTc1NDAzMjUyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
